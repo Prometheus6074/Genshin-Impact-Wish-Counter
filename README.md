@@ -78,7 +78,7 @@ The three files must stay in the same directory — `wish-counter.html` referenc
 
 ## License
 
-MIT — see [LICENSE](LICENSE) for details (add one if you don't have it yet).
+MIT — see [LICENSE](LICENSE) for details.
 
 ## Disclaimer
 
