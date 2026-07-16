@@ -15,9 +15,26 @@
   var DEFAULT_STD_WEAPONS = ["Aquila Favonia","Skyward Blade","Wolf's Gravestone","Skyward Pride","Primordial Jade Winged-Spear","Skyward Spine","Amos' Bow","Skyward Harp","Lost Prayer to the Sacred Winds","Skyward Atlas"];
   var DEFAULT_PROXIES = [
     "", // empty string = try direct fetch, no proxy
-    "https://api.allorigins.win/raw?url=",
-    "https://corsproxy.io/?url="
+    "https://api.codetabs.com/v1/proxy?quest=",
+    "https://corsproxy.io/?url=",
+    "https://api.allorigins.win/raw?url="
   ];
+
+  // Builds the full ordered list of proxy prefixes to try: a direct request
+  // first, then any relay URLs the user has typed into Settings (so a
+  // manually-supplied fix takes effect immediately without code changes),
+  // then the app's own built-in fallback list. Free CORS relays are prone to
+  // going down, getting rate-limited, or changing their rules with no
+  // warning — this lets a user route around a dead built-in relay on their
+  // own instead of waiting for an app update.
+  function buildProxyList(customProxies){
+    var custom = (customProxies || []).filter(function(p){ return p && p.trim(); });
+    var merged = [""].concat(custom);
+    DEFAULT_PROXIES.forEach(function(p){
+      if(merged.indexOf(p) === -1) merged.push(p);
+    });
+    return merged;
+  }
 
   var STORAGE_DATA_KEY = "wishCounter.data.v1";
   var STORAGE_SETTINGS_KEY = "wishCounter.settings.v1";
@@ -701,15 +718,39 @@
     try{ localStorage.setItem(STORAGE_DATA_KEY, JSON.stringify(db)); }
     catch(e){ console.error("Failed to save data", e); }
   }
+  // The proxy list shipped in earlier versions of the app (before there was
+  // any way to edit it) — allorigins.win-first, no codetabs, and an
+  // already-broken corsproxy.io URL shape. Since every existing user's
+  // localStorage still has this exact array saved (there was no UI to
+  // change it), silently upgrade anyone still on it to the current
+  // DEFAULT_PROXIES rather than leaving them stuck on dead relays forever.
+  // A user who deliberately edits their own custom list from now on won't
+  // match this exact array, so their choice is left alone.
+  var LEGACY_DEFAULT_PROXIES = ["", "https://api.allorigins.win/raw?url=", "https://corsproxy.io/?url="];
+  function isLegacyProxyList(list){
+    return Array.isArray(list) && list.length === LEGACY_DEFAULT_PROXIES.length &&
+      list.every(function(v, i){ return v === LEGACY_DEFAULT_PROXIES[i]; });
+  }
+
+  // The proxy list shipped in earlier versions of the app (before there was
+  // any way to edit it) saved one flat array with no "custom" vs "built-in"
+  // distinction — allorigins.win-first, no codetabs, and an already-broken
+  // corsproxy.io URL shape. loadSettings() below ignores that old saved
+  // array entirely and derives the list fresh via buildProxyList() every
+  // time, so existing users aren't stuck on dead relays forever. Anyone who
+  // adds their own relay from now on has it saved separately as
+  // customProxies, so it always survives this.
   function loadSettings(){
     try{
       var raw = localStorage.getItem(STORAGE_SETTINGS_KEY);
       if(raw){
         var parsed = JSON.parse(raw);
+        var customProxies = Array.isArray(parsed.customProxies) ? parsed.customProxies : [];
         return {
           standardCharacters: parsed.standardCharacters || DEFAULT_STD_CHARACTERS.slice(),
           standardWeapons: parsed.standardWeapons || DEFAULT_STD_WEAPONS.slice(),
-          proxies: parsed.proxies || DEFAULT_PROXIES.slice(),
+          customProxies: customProxies,
+          proxies: buildProxyList(customProxies),
           pityBuffer: (parsed.pityBuffer != null ? parsed.pityBuffer : 0)
         };
       }
@@ -717,7 +758,8 @@
     return {
       standardCharacters: DEFAULT_STD_CHARACTERS.slice(),
       standardWeapons: DEFAULT_STD_WEAPONS.slice(),
-      proxies: DEFAULT_PROXIES.slice(),
+      customProxies: [],
+      proxies: buildProxyList([]),
       pityBuffer: 0
     };
   }
@@ -3401,6 +3443,7 @@
     renderStdCharsSummary();
     renderStdWeaponsSummary();
     document.getElementById("pityBufferInput").value = settings.pityBuffer;
+    document.getElementById("customProxiesInput").value = (settings.customProxies || []).join("\n");
     renderAccountList();
   }
   document.getElementById("saveSettings").addEventListener("click", function(){
@@ -3408,6 +3451,9 @@
     settings.standardWeapons = weaponsList.filter(function(w){ return w.rarity===5 && stdWeaponsSelected.has(normalizeName(w.name)); }).map(function(w){ return w.name; });
     var pb = parseInt(document.getElementById("pityBufferInput").value, 10);
     settings.pityBuffer = (!isNaN(pb) && pb >= 0) ? Math.min(pb, 89) : 0;
+    settings.customProxies = document.getElementById("customProxiesInput").value
+      .split("\n").map(function(s){ return s.trim(); }).filter(Boolean);
+    settings.proxies = buildProxyList(settings.customProxies);
     saveSettings();
     renderAll();
     var btn = document.getElementById("saveSettings");

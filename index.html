@@ -170,6 +170,17 @@
           <input type="number" id="pityBufferInput" min="0" max="89" step="1">
 
           <p class="hint" style="margin-top:18px;">
+            Import Wishes fetches your wish history directly from HoYoverse's API. Browsers block that request
+            unless it comes with the right headers, so a list of free CORS relay services is tried in order (after
+            trying a direct request first) until one works. These free services occasionally change their rules,
+            get rate-limited, or shut down — if imports suddenly start failing, add a working relay's URL below (one
+            per line, ending in the query param it expects, e.g. <code>?url=</code> or <code>?quest=</code>) and it
+            will be tried before the built-in list. Leave blank to just use the built-in list.
+          </p>
+          <label for="customProxiesInput">Custom CORS relay URLs (optional, one per line, tried first)</label>
+          <textarea id="customProxiesInput" rows="3" placeholder="https://example-proxy.com/?url="></textarea>
+
+          <p class="hint" style="margin-top:18px;">
             Win/loss on the Character and Weapon Event banners is worked out by checking each 5★ pull against the
             standard-banner picks below — pulled straight from your Characters and Weapons lists. Tap to
             toggle; new characters or weapons occasionally join the standard banner, so update this if a recent
