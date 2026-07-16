@@ -2,8 +2,7 @@
 
 A single-page, self-contained Genshin Impact wish (gacha) tracker. Import your wish history straight from HoYoverse's API, track pity and 50/50 outcomes, keep a roster of characters and weapons, and view a full banner/event timeline — all stored locally in your browser, no backend required.
 
-**[Live demo →](https://your-username.github.io/your-repo/wish-counter.html)**
-*(replace with your actual GitHub Pages URL once deployed)*
+**[Live demo →](https://prometheus6074.github.io/Genshin-Impact-Wish-Counter/)**
 
 ![status](https://img.shields.io/badge/status-active-brightgreen) ![no backend](https://img.shields.io/badge/backend-none-blue) ![license](https://img.shields.io/badge/license-MIT-lightgrey)
 
@@ -24,8 +23,8 @@ Just open the [live demo](#wish-counter) link above — no installation needed.
 
 ### Option 2: Run it locally
 1. Clone or download this repo.
-2. Keep `wish-counter.html`, `styles.css`, and `script.js` in the same folder.
-3. Open `wish-counter.html` in any modern browser.
+2. Keep `index.html`, `styles.css`, and `script.js` in the same folder.
+3. Open `index.html` in any modern browser.
 
 There's no build step, no dependencies, and no server — it's plain HTML/CSS/JS.
 
@@ -49,13 +48,13 @@ Re-running an import only fetches new wishes since your last import — nothing 
 
 ```
 .
-├── wish-counter.html   # Page markup only
+├── index.html          # Page markup only
 ├── styles.css          # All styling
 ├── script.js           # All application logic (state, rendering, imports)
 └── README.md
 ```
 
-The three files must stay in the same directory — `wish-counter.html` references the other two via relative `<link>`/`<script src>` paths.
+The three files must stay in the same directory — `index.html` references the other two via relative `<link>`/`<script src>` paths.
 
 ## Data & privacy
 
@@ -68,7 +67,7 @@ The three files must stay in the same directory — `wish-counter.html` referenc
 1. Push this repo to GitHub.
 2. Go to **Settings → Pages**.
 3. Under **Build and deployment**, set **Source** to "Deploy from a branch," pick your default branch and the `/ (root)` folder.
-4. Save. Your site will be published at `https://<username>.github.io/<repo>/wish-counter.html`.
+4. Save. Your site will be published at `https://<username>.github.io/<repo>/` (GitHub Pages automatically serves `index.html` as the homepage).
 
 ## Acknowledgements
 
